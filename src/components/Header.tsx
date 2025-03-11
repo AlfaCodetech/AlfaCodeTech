@@ -71,15 +71,12 @@ const Header = () => {
       )}
     >
       <div className="container-custom flex items-center justify-between">
-        <a href="#inicio" className="flex items-center space-x-2 z-10">
-          <span 
-            className={cn(
-              "text-2xl font-bold tracking-tight transition-colors", 
-              scrolled ? "text-alfatech-950" : "text-white"
-            )}
-          >
-            AlfaCodeTech
-          </span>
+        <a href="#inicio" className="flex items-center space-x-3 z-10">
+          <img 
+            src="/lovable-uploads/bbfb1bf9-8832-4b3b-9536-4a9e7e605eb3.png" 
+            alt="AlfaCodeTech Logo" 
+            className="h-10 md:h-12" 
+          />
         </a>
 
         {/* Mobile menu button */}

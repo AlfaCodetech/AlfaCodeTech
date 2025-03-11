@@ -8,7 +8,6 @@ import Portfolio from "@/components/Portfolio";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import { useToast } from "@/components/ui/use-toast";
-import { ScriptProps } from "next/script";
 
 // This would typically come from a CDN or be properly imported
 declare global {
