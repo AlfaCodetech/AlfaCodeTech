@@ -7,6 +7,7 @@ import About from "@/components/About";
 import Portfolio from "@/components/Portfolio";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 import { useToast } from "@/components/ui/use-toast";
 
 // This would typically come from a CDN or be properly imported
@@ -83,6 +84,7 @@ const Index = () => {
         <Contact />
       </main>
       <Footer />
+      <ScrollToTop />
     </div>
   );
 };
