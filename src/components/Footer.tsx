@@ -1,6 +1,7 @@
 
 import { cn } from "@/lib/utils";
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -124,18 +125,18 @@ const Footer = () => {
             &copy; {currentYear} AlfaCodeTech. Todos os direitos reservados.
           </p>
           <div className="flex space-x-6">
-            <a
-              href="#"
+            <Link
+              to="/termos-de-uso"
               className="text-gray-400 text-sm hover:text-white transition-colors"
             >
               Termos de Uso
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/politica-de-privacidade"
               className="text-gray-400 text-sm hover:text-white transition-colors"
             >
               Política de Privacidade
-            </a>
+            </Link>
           </div>
         </div>
       </div>
