@@ -22,6 +22,30 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check system preference for dark mode and apply it
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // Listen for changes in system preference
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleDarkModeChange = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    darkModeMediaQuery.addEventListener('change', handleDarkModeChange);
+    return () => {
+      darkModeMediaQuery.removeEventListener('change', handleDarkModeChange);
+    };
+  }, []);
+
+  useEffect(() => {
     // Load Three.js from CDN
     const loadThreeJs = () => {
       if (window.THREE) return Promise.resolve();
@@ -75,7 +99,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col dark:bg-alfatech-950 dark:text-white">
       <Header />
       <main>
         <Hero />

@@ -55,8 +55,8 @@ const WhatsAppButton = ({
       onClick={handleClick}
       className={cn(
         "fixed left-6 bottom-6 z-50 p-3 rounded-full shadow-lg transition-all duration-300 transform",
-        "bg-green-500 hover:bg-green-600 text-white",
-        "focus:outline-none focus:ring-2 focus:ring-green-400",
+        "bg-green-500 hover:bg-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700",
+        "focus:outline-none focus:ring-2 focus:ring-green-400 dark:focus:ring-green-500",
         isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0 pointer-events-none"
       )}
       aria-label="Contato via WhatsApp"

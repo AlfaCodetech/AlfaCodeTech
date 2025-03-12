@@ -87,7 +87,7 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-lg;
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-lg dark:bg-alfatech-950/70 dark:border-alfatech-800/20;
   }
   
   .section-padding {
