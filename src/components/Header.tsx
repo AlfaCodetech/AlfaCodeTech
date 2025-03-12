@@ -1,9 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 
-const Header = () => {
+interface HeaderProps {
+  darkMode: boolean;
+  toggleDarkMode: () => void;
+}
+
+const Header = ({ darkMode, toggleDarkMode }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("inicio");
@@ -66,7 +71,7 @@ const Header = () => {
       className={cn(
         "fixed top-0 left-0 w-full z-50 transition-all duration-300",
         scrolled
-          ? "bg-white/80 backdrop-blur-md shadow-sm py-3"
+          ? "bg-white/80 backdrop-blur-md shadow-sm py-3 dark:bg-alfatech-950/80"
           : "bg-transparent py-5"
       )}
     >
@@ -79,12 +84,27 @@ const Header = () => {
           />
         </a>
 
+        {/* Dark mode toggle button */}
+        <button
+          onClick={toggleDarkMode}
+          className={cn(
+            "p-2 rounded-full transition-colors mr-2 md:mr-0",
+            scrolled 
+              ? "bg-alfatech-100 text-alfatech-900 hover:bg-alfatech-200 dark:bg-alfatech-800 dark:text-white dark:hover:bg-alfatech-700" 
+              : "bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm dark:bg-alfatech-900/40 dark:hover:bg-alfatech-900/60"
+          )}
+          aria-label={darkMode ? "Ativar modo claro" : "Ativar modo escuro"}
+          title={darkMode ? "Ativar modo claro" : "Ativar modo escuro"}
+        >
+          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+
         {/* Mobile menu button */}
         <button
           onClick={toggleMenu}
           className={cn(
             "md:hidden z-10 p-2 transition-colors",
-            scrolled ? "text-alfatech-950" : "text-white"
+            scrolled ? "text-alfatech-950 dark:text-white" : "text-white"
           )}
           aria-label="Toggle menu"
         >
@@ -103,7 +123,7 @@ const Header = () => {
               }}
               className={cn(
                 "text-sm font-medium relative animated-underline transition-colors",
-                scrolled ? "text-alfatech-950" : "text-white",
+                scrolled ? "text-alfatech-950 dark:text-white" : "text-white",
                 activeSection === link.id ? "opacity-100" : "opacity-70 hover:opacity-100"
               )}
             >
@@ -119,8 +139,8 @@ const Header = () => {
             className={cn(
               "px-5 py-2 rounded-full text-sm font-medium transition-all",
               scrolled 
-                ? "bg-alfatech-600 text-white hover:bg-alfatech-700" 
-                : "bg-white text-alfatech-950 hover:bg-gray-100"
+                ? "bg-alfatech-600 text-white hover:bg-alfatech-700 dark:bg-alfatech-700 dark:hover:bg-alfatech-600" 
+                : "bg-white text-alfatech-950 hover:bg-gray-100 dark:bg-alfatech-800 dark:text-white dark:hover:bg-alfatech-700"
             )}
           >
             Fale Conosco
@@ -159,10 +179,28 @@ const Header = () => {
                 e.preventDefault();
                 scrollToSection("contato");
               }}
-              className="mt-4 px-6 py-3 bg-white text-alfatech-950 rounded-full text-lg font-medium hover:bg-gray-100 transition-colors"
+              className="mt-4 px-6 py-3 bg-white text-alfatech-950 rounded-full text-lg font-medium hover:bg-gray-100 transition-colors dark:bg-alfatech-700 dark:text-white dark:hover:bg-alfatech-600"
             >
               Fale Conosco
             </a>
+            
+            {/* Dark mode toggle in mobile menu */}
+            <button
+              onClick={toggleDarkMode}
+              className="mt-6 flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
+            >
+              {darkMode ? (
+                <>
+                  <Sun size={20} />
+                  <span>Modo Claro</span>
+                </>
+              ) : (
+                <>
+                  <Moon size={20} />
+                  <span>Modo Escuro</span>
+                </>
+              )}
+            </button>
           </nav>
         </div>
       </div>
