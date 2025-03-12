@@ -8,7 +8,8 @@ import Portfolio from "@/components/Portfolio";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import { useToast } from "@/components/ui/use-toast";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import { useToast } from "@/hooks/use-toast";
 
 // This would typically come from a CDN or be properly imported
 declare global {
@@ -85,6 +86,7 @@ const Index = () => {
       </main>
       <Footer />
       <ScrollToTop />
+      <WhatsAppButton phoneNumber="5511900000000" />
     </div>
   );
 };
