@@ -134,10 +134,12 @@ const Index = () => {
       <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
       <main>
         <Hero />
-        <Services />
-        <About />
-        <Portfolio />
-        <Contact />
+        <div className="dark:bg-alfatech-950">
+          <Services />
+          <About />
+          <Portfolio />
+          <Contact />
+        </div>
       </main>
       <Footer />
       <ScrollToTop />
