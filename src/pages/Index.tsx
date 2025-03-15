@@ -20,17 +20,24 @@ declare global {
 
 const Index = () => {
   const { toast } = useToast();
+  const [threeJsLoaded, setThreeJsLoaded] = useState(false);
 
   useEffect(() => {
     // Load Three.js from CDN
     const loadThreeJs = () => {
-      if (window.THREE) return Promise.resolve();
+      if (window.THREE) {
+        setThreeJsLoaded(true);
+        return Promise.resolve();
+      }
 
       return new Promise<void>((resolve, reject) => {
         const script = document.createElement("script");
         script.src = "https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js";
         script.async = true;
-        script.onload = () => resolve();
+        script.onload = () => {
+          setThreeJsLoaded(true);
+          resolve();
+        };
         script.onerror = reject;
         document.head.appendChild(script);
       });
@@ -78,7 +85,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main>
-        <Hero />
+        <Hero threeJsLoaded={threeJsLoaded} />
         <div>
           <Services />
           <About />
