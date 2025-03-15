@@ -1,11 +1,16 @@
 
 import { useEffect, useRef, useState } from "react";
-import { Mail, MapPin, Phone, Send, CheckCircle } from "lucide-react";
+import { Mail, MapPin, Phone, Send, CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import emailjs from '@emailjs/browser';
+import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
   const animatedElements = useRef<NodeListOf<Element> | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -42,18 +47,63 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    // Simulate form submission
-    setTimeout(() => {
-      setFormSubmitted(true);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
+    
+    // Check if all required fields are filled
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
       });
-    }, 1000);
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // EmailJS service, template, and user IDs
+    // Replace these with your actual EmailJS credentials
+    const serviceId = "service_your_service_id";
+    const templateId = "template_your_template_id";
+    const publicKey = "your_public_key";
+    
+    // Prepare the template parameters
+    const templateParams = {
+      from_name: formData.name,
+      from_email: formData.email,
+      from_phone: formData.phone,
+      subject: formData.subject,
+      message: formData.message
+    };
+    
+    // Send the email using EmailJS
+    emailjs.send(serviceId, templateId, templateParams, publicKey)
+      .then((response) => {
+        console.log("Email sent successfully:", response);
+        setFormSubmitted(true);
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+        toast({
+          title: "Sucesso",
+          description: "Sua mensagem foi enviada com sucesso!",
+          variant: "default",
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to send email:", error);
+        toast({
+          title: "Erro",
+          description: "Houve um problema ao enviar sua mensagem. Por favor, tente novamente.",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   const handleChange = (
@@ -195,14 +245,14 @@ const Contact = () => {
                   Envie uma Mensagem
                 </h3>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label
                         htmlFor="name"
                         className="block text-sm font-medium text-alfatech-950 mb-2"
                       >
-                        Nome Completo
+                        Nome Completo <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -221,7 +271,7 @@ const Contact = () => {
                         htmlFor="email"
                         className="block text-sm font-medium text-alfatech-950 mb-2"
                       >
-                        Email
+                        Email <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
@@ -260,7 +310,7 @@ const Contact = () => {
                         htmlFor="subject"
                         className="block text-sm font-medium text-alfatech-950 mb-2"
                       >
-                        Assunto
+                        Assunto <span className="text-red-500">*</span>
                       </label>
                       <select
                         id="subject"
@@ -286,7 +336,7 @@ const Contact = () => {
                       htmlFor="message"
                       className="block text-sm font-medium text-alfatech-950 mb-2"
                     >
-                      Mensagem
+                      Mensagem <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       id="message"
@@ -302,10 +352,20 @@ const Contact = () => {
 
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center w-full px-6 py-4 bg-alfatech-600 text-white rounded-lg text-base font-medium hover:bg-alfatech-700 transition-colors"
+                    disabled={isSubmitting}
+                    className="inline-flex items-center justify-center w-full px-6 py-4 bg-alfatech-600 text-white rounded-lg text-base font-medium hover:bg-alfatech-700 transition-colors disabled:opacity-70"
                   >
-                    <Send size={18} className="mr-2" />
-                    Enviar Mensagem
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={18} className="mr-2 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={18} className="mr-2" />
+                        Enviar Mensagem
+                      </>
+                    )}
                   </button>
                 </form>
               </div>

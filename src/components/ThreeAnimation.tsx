@@ -1,166 +1,190 @@
 
 import { useEffect, useRef } from "react";
-import * as THREE from "three";
 
-interface ThreeAnimationProps {
-  className?: string;
+// We'll use the global THREE object loaded via CDN
+declare global {
+  interface Window {
+    THREE: any;
+  }
 }
 
-const ThreeAnimation = ({ className }: ThreeAnimationProps) => {
+const ThreeAnimation = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mousePosition = useRef({ x: 0, y: 0 });
+  const sceneRef = useRef<any>(null);
+  const cameraRef = useRef<any>(null);
+  const rendererRef = useRef<any>(null);
+  const particlesRef = useRef<any>(null);
+  const frameIdRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !window.THREE) {
+      return;
+    }
 
-    // Create scene
-    const scene = new THREE.Scene();
-    
-    // Create camera
-    const camera = new THREE.PerspectiveCamera(
+    const { Scene, PerspectiveCamera, WebGLRenderer, BufferGeometry, 
+            PointsMaterial, Float32BufferAttribute, Points, 
+            Color, AdditiveBlending } = window.THREE;
+
+    // Scene setup
+    const scene = new Scene();
+    sceneRef.current = scene;
+
+    // Camera setup
+    const camera = new PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    camera.position.z = 5;
+    camera.position.z = 50;
+    cameraRef.current = camera;
 
-    // Create renderer
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true,
-      alpha: true 
-    });
+    // Renderer setup
+    const renderer = new WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
     containerRef.current.appendChild(renderer.domElement);
-
-    // Create ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-
-    // Create directional light
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(1, 1, 1);
-    scene.add(directionalLight);
+    rendererRef.current = renderer;
 
     // Create particles
-    const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 1500;
-    
-    const posArray = new Float32Array(particlesCount * 3);
-    for (let i = 0; i < particlesCount * 3; i++) {
-      posArray[i] = (Math.random() - 0.5) * 10;
-    }
-    
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    
-    const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.02,
-      color: 0x0071e3,
-      transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending
-    });
-    
-    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particlesMesh);
+    const createParticles = () => {
+      const geometry = new BufferGeometry();
+      const particleCount = 1000;
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+      const sizes = new Float32Array(particleCount);
+      const distances = [];
 
-    // Create several floating objects in the background
-    const createFloatingObject = (position: THREE.Vector3, color: number, scale: number) => {
-      const geometry = new THREE.IcosahedronGeometry(1, 0);
-      const material = new THREE.MeshPhongMaterial({
-        color,
+      const color = new Color("#3b82f6"); // Blue color
+
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        // Position
+        const x = (Math.random() - 0.5) * 100;
+        const y = (Math.random() - 0.5) * 100;
+        const z = (Math.random() - 0.5) * 100;
+
+        positions[i] = x;
+        positions[i + 1] = y;
+        positions[i + 2] = z;
+
+        // Calculate distance from center for animation
+        const distance = Math.sqrt(x * x + y * y + z * z);
+        distances.push(distance);
+
+        // Color - slightly vary the color
+        colors[i] = color.r;
+        colors[i + 1] = color.g;
+        colors[i + 2] = color.b;
+
+        // Size - particles further from center are smaller
+        sizes[i / 3] = 0.5 + Math.random() * 1.5;
+      }
+
+      geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
+      geometry.setAttribute("size", new Float32BufferAttribute(sizes, 1));
+
+      const material = new PointsMaterial({
+        size: 0.5,
+        vertexColors: true,
         transparent: true,
-        opacity: 0.7,
-        flatShading: true
+        opacity: 0.8,
+        blending: AdditiveBlending,
       });
-      
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.copy(position);
-      mesh.scale.set(scale, scale, scale);
-      scene.add(mesh);
-      
-      return mesh;
+
+      const particles = new Points(geometry, material);
+      scene.add(particles);
+      particlesRef.current = { particles, distances };
+
+      return particles;
     };
 
-    const objects = [
-      createFloatingObject(new THREE.Vector3(-3, 2, -5), 0x0071e3, 0.5),
-      createFloatingObject(new THREE.Vector3(3, -2, -7), 0x00c2ff, 0.7),
-      createFloatingObject(new THREE.Vector3(-2, -3, -6), 0x5edfff, 0.4),
-      createFloatingObject(new THREE.Vector3(4, 1, -8), 0x0071e3, 0.6),
-      createFloatingObject(new THREE.Vector3(0, 3, -9), 0x00a8ff, 0.8),
-    ];
+    createParticles();
 
-    // Handle mouse movement for parallax effect
-    const handleMouseMove = (event: MouseEvent) => {
-      mousePosition.current = {
-        x: (event.clientX / window.innerWidth) * 2 - 1,
-        y: -(event.clientY / window.innerHeight) * 2 + 1
-      };
+    // Animation loop
+    const animate = () => {
+      if (particlesRef.current) {
+        const { particles, distances } = particlesRef.current;
+
+        // Rotate particles
+        particles.rotation.x += 0.0005;
+        particles.rotation.y += 0.001;
+
+        // Pulsate particles
+        const positions = particles.geometry.attributes.position.array;
+        const time = Date.now() * 0.0005;
+
+        for (let i = 0; i < positions.length; i += 3) {
+          const idx = i / 3;
+          const distanceFactor = distances[idx] * 0.01;
+          
+          const x = positions[i];
+          const y = positions[i + 1];
+          const z = positions[i + 2];
+          
+          // Calculate normalized direction vector
+          const length = Math.sqrt(x * x + y * y + z * z);
+          
+          if (length > 0) {
+            const nx = x / length;
+            const ny = y / length;
+            const nz = z / length;
+            
+            // Pulsate effect - move particles slightly in and out
+            const pulseFactor = Math.sin(time + distanceFactor) * 5;
+            
+            positions[i] = nx * (distances[idx] + pulseFactor);
+            positions[i + 1] = ny * (distances[idx] + pulseFactor);
+            positions[i + 2] = nz * (distances[idx] + pulseFactor);
+          }
+        }
+        
+        particles.geometry.attributes.position.needsUpdate = true;
+      }
+
+      // Render the scene
+      renderer.render(scene, camera);
+      frameIdRef.current = requestAnimationFrame(animate);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    animate();
 
     // Handle window resize
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (cameraRef.current && rendererRef.current) {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        cameraRef.current.aspect = width / height;
+        cameraRef.current.updateProjectionMatrix();
+        rendererRef.current.setSize(width, height);
+      }
     };
 
     window.addEventListener("resize", handleResize);
 
-    // Animation loop
-    const clock = new THREE.Clock();
-    
-    const animate = () => {
-      const elapsedTime = clock.getElapsedTime();
-      
-      // Rotate particles slowly
-      particlesMesh.rotation.x = elapsedTime * 0.05;
-      particlesMesh.rotation.y = elapsedTime * 0.03;
-      
-      // Move floating objects
-      objects.forEach((obj, i) => {
-        const speed = 0.2 + i * 0.05;
-        obj.rotation.x = elapsedTime * speed * 0.3;
-        obj.rotation.y = elapsedTime * speed * 0.2;
-        obj.position.y += Math.sin(elapsedTime * speed) * 0.002;
-        obj.position.x += Math.cos(elapsedTime * speed) * 0.002;
-      });
-      
-      // Apply subtle camera movement based on mouse position
-      camera.position.x += (mousePosition.current.x * 0.5 - camera.position.x) * 0.05;
-      camera.position.y += (mousePosition.current.y * 0.5 - camera.position.y) * 0.05;
-      
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    };
-    
-    animate();
-
     // Cleanup
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
       
-      if (containerRef.current && renderer.domElement) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (frameIdRef.current !== null) {
+        cancelAnimationFrame(frameIdRef.current);
       }
       
-      scene.remove(particlesMesh);
-      particlesGeometry.dispose();
-      particlesMaterial.dispose();
+      if (rendererRef.current && containerRef.current) {
+        containerRef.current.removeChild(rendererRef.current.domElement);
+      }
       
-      objects.forEach(obj => {
-        scene.remove(obj);
-        obj.geometry.dispose();
-        (obj.material as THREE.Material).dispose();
-      });
+      if (particlesRef.current) {
+        const { particles } = particlesRef.current;
+        particles.geometry.dispose();
+        particles.material.dispose();
+        sceneRef.current.remove(particles);
+      }
     };
   }, []);
 
-  return <div ref={containerRef} className={`three-container ${className}`} />;
+  return <div ref={containerRef} className="absolute inset-0 -z-10 overflow-hidden" />;
 };
 
 export default ThreeAnimation;
