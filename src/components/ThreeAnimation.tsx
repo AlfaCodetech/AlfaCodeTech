@@ -18,9 +18,11 @@ const ThreeAnimation = () => {
 
   useEffect(() => {
     if (!containerRef.current || !window.THREE) {
+      console.error("Three.js is not loaded or container not found");
       return;
     }
 
+    // Extract THREE objects from the global scope
     const { Scene, PerspectiveCamera, WebGLRenderer, BufferGeometry, 
             PointsMaterial, Float32BufferAttribute, Points, 
             Color, AdditiveBlending } = window.THREE;
@@ -172,7 +174,11 @@ const ThreeAnimation = () => {
       }
       
       if (rendererRef.current && containerRef.current) {
-        containerRef.current.removeChild(rendererRef.current.domElement);
+        try {
+          containerRef.current.removeChild(rendererRef.current.domElement);
+        } catch (e) {
+          console.error("Error removing renderer:", e);
+        }
       }
       
       if (particlesRef.current) {

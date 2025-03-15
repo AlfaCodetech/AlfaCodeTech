@@ -2,7 +2,11 @@
 import { ArrowDown } from "lucide-react";
 import ThreeAnimation from "./ThreeAnimation";
 
-const Hero = () => {
+interface HeroProps {
+  threeJsLoaded?: boolean;
+}
+
+const Hero = ({ threeJsLoaded = false }: HeroProps) => {
   const scrollToNextSection = () => {
     const nextSection = document.getElementById("servicos");
     if (nextSection) {
@@ -21,7 +25,7 @@ const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-alfatech-950/80 via-alfatech-950/50 to-transparent z-0"></div>
       
       {/* 3D background */}
-      <ThreeAnimation />
+      {threeJsLoaded && <ThreeAnimation />}
       
       <div className="container-custom relative z-10 mt-16 md:mt-0">
         <div className="max-w-4xl mx-auto text-center">
