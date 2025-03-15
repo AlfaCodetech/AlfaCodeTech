@@ -1,5 +1,6 @@
 
 import { useEffect, useRef } from "react";
+import * as THREE from "three";
 
 interface ThreeAnimationProps {
   className?: string;
@@ -10,10 +11,8 @@ const ThreeAnimation = ({ className }: ThreeAnimationProps) => {
   const mousePosition = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    if (!containerRef.current || !window.THREE) return;
+    if (!containerRef.current) return;
 
-    const THREE = window.THREE;
-    
     // Create scene
     const scene = new THREE.Scene();
     

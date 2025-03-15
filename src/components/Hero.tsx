@@ -2,11 +2,7 @@
 import { ArrowDown } from "lucide-react";
 import ThreeAnimation from "./ThreeAnimation";
 
-interface HeroProps {
-  threeJsLoaded: boolean;
-}
-
-const Hero = ({ threeJsLoaded }: HeroProps) => {
+const Hero = () => {
   const scrollToNextSection = () => {
     const nextSection = document.getElementById("servicos");
     if (nextSection) {
@@ -19,13 +15,13 @@ const Hero = ({ threeJsLoaded }: HeroProps) => {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-alfatech-950"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
       {/* Overlay gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-alfatech-950/80 via-alfatech-950/50 to-transparent z-0"></div>
       
       {/* 3D background */}
-      {threeJsLoaded && <ThreeAnimation />}
+      <ThreeAnimation />
       
       <div className="container-custom relative z-10 mt-16 md:mt-0">
         <div className="max-w-4xl mx-auto text-center">

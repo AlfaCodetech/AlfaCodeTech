@@ -6,18 +6,20 @@ import Footer from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
 
 const PoliticaDePrivacidade = () => {
+  const darkMode = localStorage.getItem('theme') === 'dark';
+  
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "Política de Privacidade | AlfaCodeTech";
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <div className="min-h-screen flex flex-col dark:bg-alfatech-950 dark:text-white">
+      <Header darkMode={darkMode} toggleDarkMode={() => {}} />
       <div className="container-custom py-24 mt-16 flex-grow">
         <Link 
           to="/" 
-          className="inline-flex items-center mb-6 text-alfatech-600 hover:text-alfatech-700"
+          className="inline-flex items-center mb-6 text-alfatech-600 hover:text-alfatech-700 dark:text-alfatech-400 dark:hover:text-alfatech-300"
         >
           <ArrowLeft size={16} className="mr-2" />
           Voltar à página inicial
@@ -25,7 +27,7 @@ const PoliticaDePrivacidade = () => {
         
         <h1 className="text-4xl font-bold mb-8">Política de Privacidade</h1>
         
-        <div className="prose prose-lg max-w-none">
+        <div className="prose prose-lg dark:prose-invert max-w-none">
           <p className="lead">Última atualização: {new Date().toLocaleDateString('pt-BR')}</p>
           
           <h2>1. Introdução</h2>
