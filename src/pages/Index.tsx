@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
@@ -20,6 +19,62 @@ declare global {
 
 const Index = () => {
   const { toast } = useToast();
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Check for user preference in localStorage first
+    const savedTheme = localStorage.getItem('theme');
+    
+    if (savedTheme === 'dark') {
+      setDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      setDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    } else {
+      // If no preference is saved, check system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setDarkMode(true);
+        document.documentElement.classList.add('dark');
+      } else {
+        setDarkMode(false);
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    // Listen for changes in system preference
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleDarkModeChange = (e: MediaQueryListEvent) => {
+      // Only apply system preference if there's no saved preference
+      if (!localStorage.getItem('theme')) {
+        if (e.matches) {
+          setDarkMode(true);
+          document.documentElement.classList.add('dark');
+        } else {
+          setDarkMode(false);
+          document.documentElement.classList.remove('dark');
+        }
+      }
+    };
+
+    darkModeMediaQuery.addEventListener('change', handleDarkModeChange);
+    return () => {
+      darkModeMediaQuery.removeEventListener('change', handleDarkModeChange);
+    };
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   useEffect(() => {
     // Load Three.js from CDN
@@ -75,16 +130,14 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <div className="min-h-screen flex flex-col dark:bg-alfatech-950 dark:text-white">
+      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
       <main>
         <Hero />
-        <div>
-          <Services />
-          <About />
-          <Portfolio />
-          <Contact />
-        </div>
+        <Services />
+        <About />
+        <Portfolio />
+        <Contact />
       </main>
       <Footer />
       <ScrollToTop />
