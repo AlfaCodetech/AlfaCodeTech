@@ -1,7 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
+import Logo from "./navigation/Logo";
+import DesktopNav from "./navigation/DesktopNav";
+import MobileMenu from "./navigation/MobileMenu";
+import MenuToggle from "./navigation/MenuToggle";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -71,100 +74,27 @@ const Header = () => {
       )}
     >
       <div className="container-custom flex items-center justify-between">
-        <a href="#inicio" className="flex items-center space-x-3 z-10">
-          <img 
-            src="/lovable-uploads/bbfb1bf9-8832-4b3b-9536-4a9e7e605eb3.png" 
-            alt="AlfaCodeTech Logo" 
-            className="h-10 md:h-12" 
-          />
-        </a>
+        <Logo scrolled={scrolled} />
+        
+        <MenuToggle 
+          isOpen={isOpen} 
+          toggleMenu={toggleMenu} 
+          scrolled={scrolled} 
+        />
 
-        {/* Mobile menu button */}
-        <button
-          onClick={toggleMenu}
-          className={cn(
-            "md:hidden z-10 p-2 transition-colors",
-            scrolled ? "text-alfatech-950" : "text-white"
-          )}
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <DesktopNav 
+          navLinks={navLinks}
+          activeSection={activeSection}
+          scrolled={scrolled}
+          scrollToSection={scrollToSection}
+        />
 
-        {/* Desktop navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.id}
-              href={link.href}
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToSection(link.id);
-              }}
-              className={cn(
-                "text-sm font-medium relative animated-underline transition-colors",
-                scrolled ? "text-alfatech-950" : "text-white",
-                activeSection === link.id ? "opacity-100" : "opacity-70 hover:opacity-100"
-              )}
-            >
-              {link.name}
-            </a>
-          ))}
-          <a
-            href="#contato"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection("contato");
-            }}
-            className={cn(
-              "px-5 py-2 rounded-full text-sm font-medium transition-all",
-              scrolled 
-                ? "bg-alfatech-600 text-white hover:bg-alfatech-700" 
-                : "bg-white text-alfatech-950 hover:bg-gray-100"
-            )}
-          >
-            Fale Conosco
-          </a>
-        </nav>
-
-        {/* Mobile menu */}
-        <div 
-          className={cn(
-            "fixed inset-0 bg-alfatech-950/95 backdrop-blur-lg flex flex-col justify-center items-center transition-transform duration-300 ease-in-out md:hidden",
-            isOpen ? "translate-x-0" : "translate-x-full"
-          )}
-        >
-          <nav className="flex flex-col items-center space-y-6">
-            {navLinks.map((link) => (
-              <a
-                key={link.id}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection(link.id);
-                }}
-                className={cn(
-                  "text-2xl font-medium transition-colors",
-                  activeSection === link.id 
-                    ? "text-white" 
-                    : "text-white/70 hover:text-white"
-                )}
-              >
-                {link.name}
-              </a>
-            ))}
-            <a
-              href="#contato"
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToSection("contato");
-              }}
-              className="mt-4 px-6 py-3 bg-white text-alfatech-950 rounded-full text-lg font-medium hover:bg-gray-100 transition-colors"
-            >
-              Fale Conosco
-            </a>
-          </nav>
-        </div>
+        <MobileMenu 
+          isOpen={isOpen}
+          activeSection={activeSection}
+          scrollToSection={scrollToSection}
+          navLinks={navLinks}
+        />
       </div>
     </header>
   );
