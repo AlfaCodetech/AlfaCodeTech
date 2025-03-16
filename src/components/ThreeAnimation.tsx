@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // We'll use the global THREE object loaded via CDN
 declare global {
@@ -15,6 +15,22 @@ const ThreeAnimation = () => {
   const rendererRef = useRef<any>(null);
   const particlesRef = useRef<any>(null);
   const frameIdRef = useRef<number | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Track mouse position
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      // Calculate normalized mouse position (-1 to 1)
+      const x = (event.clientX / window.innerWidth) * 2 - 1;
+      const y = -(event.clientY / window.innerHeight) * 2 + 1;
+      setMousePosition({ x, y });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current || !window.THREE) {
@@ -108,9 +124,21 @@ const ThreeAnimation = () => {
       if (particlesRef.current) {
         const { particles, distances } = particlesRef.current;
 
-        // Rotate particles
-        particles.rotation.x += 0.0005;
-        particles.rotation.y += 0.001;
+        // Base rotation
+        particles.rotation.x += 0.0003;
+        particles.rotation.y += 0.0005;
+        
+        // Mouse-controlled rotation - add subtle rotation based on mouse position
+        particles.rotation.x += mousePosition.y * 0.001;
+        particles.rotation.y += mousePosition.x * 0.001;
+        
+        // Apply gentle tilt toward mouse position
+        const targetTiltX = mousePosition.y * 0.3;
+        const targetTiltY = mousePosition.x * 0.3;
+        
+        // Smoothly interpolate current rotation toward target tilt
+        particles.rotation.x += (targetTiltX - particles.rotation.x) * 0.02;
+        particles.rotation.y += (targetTiltY - particles.rotation.y) * 0.02;
 
         // Pulsate particles
         const positions = particles.geometry.attributes.position.array;
@@ -135,8 +163,16 @@ const ThreeAnimation = () => {
             // Pulsate effect - move particles slightly in and out
             const pulseFactor = Math.sin(time + distanceFactor) * 5;
             
-            positions[i] = nx * (distances[idx] + pulseFactor);
-            positions[i + 1] = ny * (distances[idx] + pulseFactor);
+            // Add some subtle mouse influence on particle positions
+            const mouseInfluence = 2;
+            const mouseOffset = {
+              x: nx * mousePosition.x * mouseInfluence,
+              y: ny * mousePosition.y * mouseInfluence,
+              z: 0
+            };
+            
+            positions[i] = nx * (distances[idx] + pulseFactor) + mouseOffset.x;
+            positions[i + 1] = ny * (distances[idx] + pulseFactor) + mouseOffset.y;
             positions[i + 2] = nz * (distances[idx] + pulseFactor);
           }
         }
@@ -188,7 +224,7 @@ const ThreeAnimation = () => {
         sceneRef.current.remove(particles);
       }
     };
-  }, []);
+  }, [mousePosition]); // Add mousePosition as a dependency
 
   return <div ref={containerRef} className="absolute inset-0 -z-10 overflow-hidden" />;
 };

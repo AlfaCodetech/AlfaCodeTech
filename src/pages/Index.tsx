@@ -21,6 +21,11 @@ declare global {
 const Index = () => {
   const { toast } = useToast();
   const [threeJsLoaded, setThreeJsLoaded] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
 
   useEffect(() => {
     // Load Three.js from CDN
@@ -87,7 +92,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
       <main>
         <Hero threeJsLoaded={threeJsLoaded} />
         <Services />
